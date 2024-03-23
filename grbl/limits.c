@@ -410,6 +410,7 @@ void limits_go_home(uint8_t cycle_mask)
 // NOTE: Used by jogging to limit travel within soft-limit volume.
 void limits_soft_check(float *target)
 {
+  #ifndef POLARGRAPH_DISABLE_SOFT_LIMITS
   if (system_check_travel_limits(target)) {
     sys.soft_limit = true;
     // Force feed hold if cycle is active. All buffered blocks are guaranteed to be within
@@ -427,4 +428,5 @@ void limits_soft_check(float *target)
     protocol_execute_realtime(); // Execute to enter critical event loop and system abort
     return;
   }
+  #endif
 }

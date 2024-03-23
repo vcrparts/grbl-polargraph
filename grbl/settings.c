@@ -39,8 +39,8 @@ const __flash settings_t defaults = {\
     .homing_debounce_delay = DEFAULT_HOMING_DEBOUNCE_DELAY,
     .homing_pulloff = DEFAULT_HOMING_PULLOFF,
     #ifdef POLARGRAPH 
-    .distance = DEFAULT_DISTANCE;
-    .homing_vertical_distance = DEFAULT_HOMING_VERTICAL_DISTANCE;
+    .distance = DEFAULT_DISTANCE,
+    .homing_vertical_distance = DEFAULT_HOMING_VERTICAL_DISTANCE,
     #endif
     .flags = (DEFAULT_REPORT_INCHES << BIT_REPORT_INCHES) | \
              (DEFAULT_LASER_MODE << BIT_LASER_MODE) | \

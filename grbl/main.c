@@ -47,6 +47,13 @@ int main(void)
   memset(sys_position,0,sizeof(sys_position)); // Clear machine position.
   sei(); // Enable interrupts
 
+ #ifdef POLARGRAPH_ASSUME_MANUALLY_HOMED
+  // Assume gondola is manually homed
+  sys.position[X_AXIS] = settings.distance * settings.steps_per_mm[X_AXIS] / 2;
+  sys.position[Y_AXIS] = settings.homing_vertical_distance * settings.steps_per_mm[Y_AXIS];
+  plan_sync_position();
+  #endif
+
   // Initialize system state.
   #ifdef FORCE_INITIALIZATION_ALARM
     // Force Grbl into an ALARM state upon a power-cycle or hard reset.

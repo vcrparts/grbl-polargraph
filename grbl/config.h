@@ -35,6 +35,7 @@
 // one configuration file by placing their specific defaults and pin map at the bottom of this file.
 // If doing so, simply comment out these two defines and see instructions below.
 #define DEFAULTS_GENERIC
+#define DEFAULTS_POLAR
 #define CPU_MAP_ATMEGA328P // Arduino Uno CPU
 
 // Serial baud rate
@@ -178,6 +179,20 @@
 // between restoring the spindle and coolant and resuming the cycle.
 #define SAFETY_DOOR_SPINDLE_DELAY 4.0 // Float (seconds)
 #define SAFETY_DOOR_COOLANT_DELAY 1.0 // Float (seconds)
+
+// Enable Polargraph calculations
+/* If POLAR is enabled the coordinates of the machine movement are changed to polar.
+ * To active this feature is required to know the distance (d) between the two motors
+ * 		___d___
+	 	  \     /       |
+	x_pol\   / y_pol  | y
+		    \ /         |
+	   ___ +
+ *	    x
+ */
+#define POLARGRAPH
+#define POLARGRAPH_ASSUME_MANUALLY_HOMED // when it starts up, assume gondola is manually at the home position (top middle)
+#define POLARGRAPH_DISABLE_SOFT_LIMITS // disable all soft limits checks
 
 // Enable CoreXY kinematics. Use ONLY with CoreXY machines.
 // IMPORTANT: If homing is enabled, you must reconfigure the homing cycle #defines above to

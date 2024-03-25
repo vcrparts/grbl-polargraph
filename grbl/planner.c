@@ -195,6 +195,65 @@ static void planner_recalculate()
   }
 }
 
+void convert_position_steps_to_polar_lengths( int32_t *position, float *outPolar ) {
+  float steps_per_mm = settings.steps_per_mm[A_MOTOR];
+  float xPositionMm = position[X_AXIS] / steps_per_mm;
+  float yPositionMm = position[Y_AXIS] / steps_per_mm;
+  float xPosToRightMotorMm = settings.distance - xPositionMm;
+  long xPosSquared = xPositionMm * xPositionMm;
+  long yPosSquared = yPositionMm * yPositionMm;
+  long xPosToRightMotorSquared = xPosToRightMotorMm * xPosToRightMotorMm;
+  outPolar[A_MOTOR] = sqrt(labs(xPosSquared + yPosSquared)) * steps_per_mm;
+  outPolar[B_MOTOR] = sqrt(labs(xPosToRightMotorSquared + yPosSquared)) * steps_per_mm;
+  outPolar[Z_AXIS] = 0;
+}
+void convert_position_mm_float_to_polar_lengths( float *position, float *outPolar ) {
+  float steps_per_mm = settings.steps_per_mm[A_MOTOR];
+  float xPosToRightMotor = settings.distance - position[X_AXIS];
+  long xPosSquared = position[X_AXIS] * position[X_AXIS];
+  long yPosSquared = position[Y_AXIS] * position[Y_AXIS];
+  long xPosToRightMotorSquared = xPosToRightMotor * xPosToRightMotor;
+  outPolar[A_MOTOR] = sqrt(labs(xPosSquared + yPosSquared)) * steps_per_mm;
+  outPolar[B_MOTOR] = sqrt(labs(xPosToRightMotorSquared + yPosSquared)) * steps_per_mm;
+  outPolar[Z_AXIS] = 0;
+}
+
+
+void convert_position_steps_xy_to_ab(init32_t *position, float *outPolar){
+	float steps_per_mm = settings.steps_per_mm[A_MOTOR];
+  	float xPositionMm = position[X_AXIS] / steps_per_mm;
+  	float yPositionMm = position[Y_AXIS] / steps_per_mm;
+	float xPosToRightMotorMm = settings.distance - xPositionMm;
+	long xPosSquared = xPositionMm * xPositionMm;
+	long yPosSquared = yPositionMm * yPositionMm;
+	long xPosToRightMotorSquared = xPosToRightMotorMm * xPosToRightMotorMm;
+	outPolar[A_MOTOR] = sqrt(labs(xPosSquared + yPosSquared)) * steps_per_mm;
+	outPolar[B_MOTOR] = sqrt(labs(xPosToRightMotorSquared + yPosSquared)) * steps_per_mm;
+	outPolar[Z_AXIS] = 0;
+}
+
+void convert_position_steps_ab_to_xy(float *polar, init32_t *outPosition,){
+	float steps_per_mm = settings.steps_per_mm[A_MOTOR];
+	float aPolarMm = polar[A_Motor] / steps_per_mm;
+	float bPolarMm = polar[B_Motor] / steps_per_mm;
+/*
+	s = (a + b + c)/2
+ 	c = distance
+	y = 2 * sqrt (s * (s - a) * (s - b) * (s - c)) / c
+ 	x = sqrt(labs(a^2 - y^2))
+ */
+		
+	
+	float xPosToRightMotorMm = settings.distance - xPositionMm;
+	long xPosSquared = xPositionMm * xPositionMm;
+	long yPosSquared = yPositionMm * yPositionMm;
+	long xPosToRightMotorSquared = xPosToRightMotorMm * xPosToRightMotorMm;
+	outPolar[A_MOTOR] = sqrt(labs(xPosSquared + yPosSquared)) * steps_per_mm;
+	outPolar[B_MOTOR] = sqrt(labs(xPosToRightMotorSquared + yPosSquared)) * steps_per_mm;
+	outPolar[Z_AXIS] = 0;
+}
+
+
 
 void plan_reset()
 {

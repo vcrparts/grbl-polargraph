@@ -195,6 +195,8 @@ static void planner_recalculate()
   }
 }
 
+#ifdef POLARGRAPH
+ 
 void convert_position_steps_to_polar_lengths( int32_t *position, float *outPolar ) {
   float steps_per_mm = settings.steps_per_mm[A_MOTOR];
   float xPositionMm = position[X_AXIS] / steps_per_mm;
@@ -207,6 +209,7 @@ void convert_position_steps_to_polar_lengths( int32_t *position, float *outPolar
   outPolar[B_MOTOR] = sqrt(labs(xPosToRightMotorSquared + yPosSquared)) * steps_per_mm;
   outPolar[Z_AXIS] = 0;
 }
+
 void convert_position_mm_float_to_polar_lengths( float *position, float *outPolar ) {
   float steps_per_mm = settings.steps_per_mm[A_MOTOR];
   float xPosToRightMotor = settings.distance - position[X_AXIS];
@@ -219,41 +222,34 @@ void convert_position_mm_float_to_polar_lengths( float *position, float *outPola
 }
 
 
-void convert_position_steps_xy_to_ab(init32_t *position, float *outPolar){
-	float steps_per_mm = settings.steps_per_mm[A_MOTOR];
-  	float xPositionMm = position[X_AXIS] / steps_per_mm;
-  	float yPositionMm = position[Y_AXIS] / steps_per_mm;
-	float xPosToRightMotorMm = settings.distance - xPositionMm;
-	long xPosSquared = xPositionMm * xPositionMm;
-	long yPosSquared = yPositionMm * yPositionMm;
-	long xPosToRightMotorSquared = xPosToRightMotorMm * xPosToRightMotorMm;
-	outPolar[A_MOTOR] = sqrt(labs(xPosSquared + yPosSquared)) * steps_per_mm;
-	outPolar[B_MOTOR] = sqrt(labs(xPosToRightMotorSquared + yPosSquared)) * steps_per_mm;
-	outPolar[Z_AXIS] = 0;
-}
 
-void convert_position_steps_ab_to_xy(float *polar, init32_t *outPosition,){
-	float steps_per_mm = settings.steps_per_mm[A_MOTOR];
-	float aPolarMm = polar[A_Motor] / steps_per_mm;
-	float bPolarMm = polar[B_Motor] / steps_per_mm;
-/*
+
+  int32_t system_convert_polargraph_to_y_axis_steps(int32_t aSteps, int32_t bSteps)
+  {
+	/*
 	s = (a + b + c)/2
  	c = distance
 	y = 2 * sqrt (s * (s - a) * (s - b) * (s - c)) / c
  	x = sqrt(labs(a^2 - y^2))
- */
-		
-	
-	float xPosToRightMotorMm = settings.distance - xPositionMm;
-	long xPosSquared = xPositionMm * xPositionMm;
-	long yPosSquared = yPositionMm * yPositionMm;
-	long xPosToRightMotorSquared = xPosToRightMotorMm * xPosToRightMotorMm;
-	outPolar[A_MOTOR] = sqrt(labs(xPosSquared + yPosSquared)) * steps_per_mm;
-	outPolar[B_MOTOR] = sqrt(labs(xPosToRightMotorSquared + yPosSquared)) * steps_per_mm;
-	outPolar[Z_AXIS] = 0;
-}
+ 	*/
+	float steps_per_mm = settings.steps_per_mm[A_MOTOR];
+  	float a = aSteps / steps_per_mm;
+  	float b = bSteps / steps_per_mm;
+	float c = settings.distance;
+	float s = (a + b + c) / 2f;
+	return (round (steps_per_mm * 2f * sqrt ( labs  (s * (s - a) * (s - b) * (s - c)) ) / c ));
+  }
 
+  int32_t system_convert_polargraph_to_x_axis_steps(int32_t ySteps, int32_t aSteps)
+  {
+	float steps_per_mm = settings.steps_per_mm[A_MOTOR];
+  	float a = aSteps / steps_per_mm;
+  	float y = ySteps / steps_per_mm;
+	float c = settings.distance;
+	return (round (sqrt (labs ( (a * a) - (y * y) ) ) ) );
+  }
 
+#endif
 
 void plan_reset()
 {

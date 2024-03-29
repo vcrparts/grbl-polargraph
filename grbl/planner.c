@@ -237,7 +237,7 @@ void convert_position_mm_float_to_polar_lengths( float *position, float *outPola
   	float b = bSteps / steps_per_mm;
 	float c = settings.distance;
 	float s = (a + b + c) / 2f;
-	return (round (steps_per_mm * 2f * sqrt ( labs  (s * (s - a) * (s - b) * (s - c)) ) / c ));
+	return (1round (steps_per_mm * 2f * sqrt ( labs  (s * (s - a) * (s - b) * (s - c)) ) / c ));
   }
 
   int32_t system_convert_polargraph_to_x_axis_steps(int32_t ySteps, int32_t aSteps)
@@ -246,7 +246,7 @@ void convert_position_mm_float_to_polar_lengths( float *position, float *outPola
   	float a = aSteps / steps_per_mm;
   	float y = ySteps / steps_per_mm;
 	float c = settings.distance;
-	return (round (sqrt (labs ( (a * a) - (y * y) ) ) ) );
+	return (1round (sqrt (labs ( (a * a) - (y * y) ) ) - (c / 2f) ) );
   }
 
 #endif
@@ -392,7 +392,13 @@ uint8_t plan_buffer_line(float *target, plan_line_data_t *pl_data)
       position_steps[Y_AXIS] = system_convert_corexy_to_y_axis_steps(sys_position);
       position_steps[Z_AXIS] = sys_position[Z_AXIS];
     #else
-      memcpy(position_steps, sys_position, sizeof(sys_position)); 
+ 	#ifdef POLARGRAPH
+      	  position_steps[Y_AXIS] = system_convert_polargraph_to_y_axis_steps(sys_position[A_MOTOR], sys_position[B_MOTOR]);
+      	  position_steps[X_AXIS] = system_convert_polargraph_to_x_axis_steps(position_steps[Y_AXIS], sys_position[A_MOTOR]);
+      	  position_steps[Z_AXIS] = sys_position[Z_AXIS];
+	#else
+          memcpy(position_steps, sys_position, sizeof(sys_position)); 
+      #endif
     #endif
   } else { memcpy(position_steps, pl.position, sizeof(pl.position)); }
 
@@ -401,6 +407,13 @@ uint8_t plan_buffer_line(float *target, plan_line_data_t *pl_data)
     target_steps[B_MOTOR] = lround(target[B_MOTOR]*settings.steps_per_mm[B_MOTOR]);
     block->steps[A_MOTOR] = labs((target_steps[X_AXIS]-position_steps[X_AXIS]) + (target_steps[Y_AXIS]-position_steps[Y_AXIS]));
     block->steps[B_MOTOR] = labs((target_steps[X_AXIS]-position_steps[X_AXIS]) - (target_steps[Y_AXIS]-position_steps[Y_AXIS]));
+  #else
+	#ifdef POLARGRAPH
+	    target_steps[A_MOTOR] = lround(target[A_MOTOR]*settings.steps_per_mm[A_MOTOR]);
+	    target_steps[B_MOTOR] = lround(target[B_MOTOR]*settings.steps_per_mm[B_MOTOR]);
+	    block->steps[A_MOTOR] = labs((target_steps[X_AXIS]-position_steps[X_AXIS]) + (target_steps[Y_AXIS]-position_steps[Y_AXIS]));
+	    block->steps[B_MOTOR] = labs((target_steps[X_AXIS]-position_steps[X_AXIS]) - (target_steps[Y_AXIS]-position_steps[Y_AXIS]));
+	#endif
   #endif
 
   for (idx=0; idx<N_AXIS; idx++) {
